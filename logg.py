@@ -1,8 +1,11 @@
-
 # -*- coding: utf-8 -*-
 
 import logging
 import logging.config
+
+
+# log_file = 'fire.log'
+
 
 def Loger(log_name, log_file):
     LOGGING = {
@@ -19,7 +22,7 @@ def Loger(log_name, log_file):
         'filters': {
             'basic': {
                 '()': SpiderFilter,
-                'allow': ('mongo', 'redis', 'mysql', 'ix', 'fire', 'duomi'),
+                'allow': ('mongo', 'redis', 'mysql', 'ix', 'fire', 'duomi', 'run'),
             },
             'warn': {
                 '()': SpiderFilter,
@@ -69,7 +72,7 @@ def Loger(log_name, log_file):
                 'filters': ['basic'],
                 'propagate': False,
             },
-            'ix': {
+            'run': {
                 'handlers': ['console', 'file', 'database'],
                 'level': 'INFO',
                 'filters': ['basic'],
@@ -82,6 +85,12 @@ def Loger(log_name, log_file):
                 'propagate': False,
             },
             'duomi': {
+                'handlers': ['console', 'file', 'database'],
+                'level': 'INFO',
+                'filters': ['basic'],
+                'propagate': False,
+            },
+            'taoma': {
                 'handlers': ['console', 'file', 'database'],
                 'level': 'INFO',
                 'filters': ['basic'],
@@ -121,6 +130,28 @@ class SpiderFilter(logging.Filter):
         return allow
 
 
+def log_output(logger, log_type, content_tuple):
+    """
+
+    :param logger: logger  class
+    :param log_type: info, warn, error, debug logging 的方法
+    :param content_tuple:  [('pro_name', 'duomi'),('resp', 'ok')] or str 必须以这种格式传入,输出多个需要输出的字段或者是字符串
+    :return:
+    """
+    if isinstance(content_tuple, list) or isinstance(content_tuple, tuple):
+        content_str = ' ==== '.join(["[{}]:{}".format(content[0], content[1]) for content in content_tuple])
+        getattr(logger, log_type)(content_str)
+    elif isinstance(content_tuple, str):
+        getattr(logger, log_type)(content_tuple)
+    else:
+        raise TypeError('content_tuple Type error, content_tuple必须是list,tuple,str类型')
+
+
 if __name__ == '__main__':
     log_file = 'duomi.log'
     logger = Loger('duomi', log_file)
+    content_tuple = (('pro_name', 'duomi'), ('resp', 'ok'))
+    # content_tuple = 'xxxxx'
+    # content_tuple = dict(content_tuple)
+    log_type = 'warn'
+    log_output(logger, log_type, content_tuple)
